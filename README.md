@@ -5,6 +5,9 @@
 Парсить `coverage.out` (стандартний вивід `go test -coverprofile`) та генерує HTML з collapsible tree, кольоровими індикаторами покриття та підтримкою тем і локалізації.
 
 [![CI](https://github.com/romantelychko/coverage-tree/actions/workflows/ci.yml/badge.svg)](https://github.com/romantelychko/coverage-tree/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/romantelychko/coverage-tree)](https://goreportcard.com/report/github.com/romantelychko/coverage-tree)
+[![Go Reference](https://pkg.go.dev/badge/github.com/romantelychko/coverage-tree.svg)](https://pkg.go.dev/github.com/romantelychko/coverage-tree)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Встановлення
 
