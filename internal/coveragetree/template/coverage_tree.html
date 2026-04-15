@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="{{.Lang}}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{{.Title}}</title>
+  <style>
+    :root {
+      {{.ThemeVars}}
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 13px;
+      background: var(--bg);
+      color: var(--t);
+      padding: 20px;
+      line-height: 1.5;
+      max-width: 768px;
+      margin: 0 auto
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--a)
+    }
+
+    .su {
+      color: var(--td);
+      margin-bottom: 20px;
+      font-size: 12px
+    }
+
+    .ct {
+      margin-bottom: 16px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .ct button {
+      background: var(--btn);
+      border: 1px solid var(--bd);
+      color: var(--t);
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px
+    }
+
+    .ct button:hover {
+      background: var(--bh)
+    }
+
+    .tr {
+      user-select: none
+    }
+
+    .nd {
+      margin-left: 0
+    }
+
+    .nd .nd {
+      margin-left: 20px
+    }
+
+    .nh {
+      display: flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      gap: 6px;
+      transition: background .1s
+    }
+
+    .nh:hover {
+      background: var(--bh)
+    }
+
+    .tg {
+      width: 16px;
+      text-align: center;
+      color: var(--td);
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: transform .15s
+    }
+
+    .tg.op {
+      transform: rotate(90deg)
+    }
+
+    .ic {
+      flex-shrink: 0;
+      font-size: 14px
+    }
+
+    .nm {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .nm.dr {
+      font-weight: 600
+    }
+
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      font-size: 12px
+    }
+
+    .bw {
+      width: 120px;
+      height: 6px;
+      background: var(--bb);
+      border-radius: 3px;
+      overflow: hidden;
+      flex-shrink: 0
+    }
+
+    .br {
+      display: block;
+      height: 100%;
+      border-radius: 3px;
+      transition: width .3s
+    }
+
+    .pc {
+      width: 52px;
+      text-align: right
+    }
+
+    .ln {
+      width: 100px;
+      text-align: right;
+      color: var(--td);
+      font-size: 11px
+    }
+
+    .ch {
+      display: none
+    }
+
+    .ch.op {
+      display: block
+    }
+
+    .fr {
+      display: flex;
+      align-items: center;
+      padding: 2px 8px 2px 42px;
+      gap: 6px;
+      border-radius: 4px
+    }
+
+    .fr:hover {
+      background: var(--bf)
+    }
+
+    .fi {
+      color: var(--td);
+      font-size: 12px;
+      flex-shrink: 0
+    }
+
+    .cg {
+      color: var(--g)
+    }
+
+    .cy {
+      color: var(--y)
+    }
+
+    .cr {
+      color: var(--r)
+    }
+
+    .bg {
+      background: var(--bar-g)
+    }
+
+    .by {
+      background: var(--bar-y)
+    }
+
+    .brr {
+      background: var(--bar-r)
+    }
+
+    .hr {
+      display: flex;
+      align-items: center;
+      padding: 3px 8px;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--td);
+      border-bottom: 1px solid var(--bd);
+      margin-bottom: 4px
+    }
+  </style>
+</head>
+
+<body>
+  <h1>{{.Title}}</h1>
+  <div class="su" id="su"></div>
+  <div class="ct">
+    <button onclick="eAll()">{{.ExpandAll}}</button>
+    <button onclick="cAll()">{{.CollapseAll}}</button>
+  </div>
+  <div class="hr">
+    <span style="width:22px"></span><span style="width:16px"></span>
+    <span class="nm">{{.HeaderName}}</span>
+    <span class="st"><span class="bw" style="visibility:hidden"></span>
+      <span class="pc">{{.HeaderCoverage}}</span><span class="ln">{{.HeaderLines}}</span></span>
+  </div>
+  <div class="tr" id="tr"></div>
+  <script>
+    const D = {{.TreeData}};
+    function cc(p) { return p >= 70 ? "g" : p >= 40 ? "y" : "r" }
+    function cs(c) { return { g: "cg", y: "cy", r: "cr" }[c] }
+    function bs(c) { return { g: "bg", y: "by", r: "brr" }[c] }
+    function esc(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML }
+
+    function rn(n, dp) {
+      const has = n.children.length > 0 || n.files.length > 0, c = cc(n.coverage);
+      let h = '<div class="nd" data-d="' + dp + '">'
+        + '<div class="nh" onclick="tog(this)">'
+        + '<span class="tg">' + (has ? '&#9654;' : '&nbsp;') + '</span>'
+        + '<span class="ic">&#128193;</span>'
+        + '<span class="nm dr">' + esc(n.name) + '/</span>'
+        + '<span class="st">'
+        + '<span class="bw"><span class="br ' + bs(c) + '" style="width:' + n.coverage + '%"></span></span>'
+        + '<span class="pc ' + cs(c) + '">' + n.coverage.toFixed(1) + '%</span>'
+        + '<span class="ln">' + n.covered + ' / ' + n.statements + '</span>'
+        + '</span></div>';
+      if (has) {
+        h += '<div class="ch">';
+        for (const x of n.children) h += rn(x, dp + 1);
+        for (const f of n.files) h += rf(f);
+        h += '</div>'
+      }
+      return h + '</div>';
+    }
+
+    function rf(f) {
+      const c = cc(f.coverage);
+      return '<div class="fr fe">'
+        + '<span class="fi">&#128196;</span>'
+        + '<span class="nm">' + esc(f.name) + '</span>'
+        + '<span class="st">'
+        + '<span class="bw"><span class="br ' + bs(c) + '" style="width:' + f.coverage + '%"></span></span>'
+        + '<span class="pc ' + cs(c) + '">' + f.coverage.toFixed(1) + '%</span>'
+        + '<span class="ln">' + f.covered + ' / ' + f.statements + '</span>'
+        + '</span></div>';
+    }
+
+    function tog(hdr) {
+      const nd = hdr.parentElement, ch = nd.querySelector(':scope>.ch'),
+        tg = hdr.querySelector('.tg');
+      if (!ch) return; ch.classList.toggle('op'); tg.classList.toggle('op');
+    }
+    function eAll() {
+      document.querySelectorAll('.ch').forEach(e => e.classList.add('op'));
+      document.querySelectorAll('.tg').forEach(e => e.classList.add('op'));
+    }
+    function cAll() {
+      document.querySelectorAll('.ch').forEach(e => e.classList.remove('op'));
+      document.querySelectorAll('.tg').forEach(e => e.classList.remove('op'));
+    }
+
+    (function () {
+      const tr = document.getElementById('tr');
+      let h = '';
+      for (const c of D.children) h += rn(c, 0);
+      for (const f of D.files) h += rf(f);
+      tr.innerHTML = h;
+      const s = document.getElementById('su'), cl = cs(cc(D.coverage));
+      s.innerHTML = '{{.SummaryLabel}}: <span class="' + cl + '" style="font-weight:600">'
+        + D.coverage.toFixed(1) + '%</span> (' + D.covered + ' / ' + D.statements + ')';
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,5 @@
+mode: atomic
+github.com/myorg/myproject/internal/users/service.go:10.30,15.2 4 3
+github.com/myorg/myproject/internal/users/service.go:10.30,15.2 4 5
+github.com/myorg/myproject/internal/users/service.go:17.40,20.2 2 0
+github.com/myorg/myproject/internal/users/service.go:17.40,20.2 2 0

@@ -1,0 +1,5 @@
+mode: set
+github.com/myorg/myproject/internal/users/service.go:10.30,15.2 4 1
+
+this-line-does-not-match-coverage-pattern
+github.com/myorg/myproject/internal/auth/middleware.go:5.20,10.2 3 1

@@ -1,0 +1,8 @@
+mode: set
+github.com/myorg/myproject/internal/users/handler.go:10.30,12.2 1 1
+github.com/myorg/myproject/internal/users/handler.go:14.40,18.2 3 0
+github.com/myorg/myproject/internal/users/service.go:10.30,15.2 4 1
+github.com/myorg/myproject/internal/users/service.go:17.40,20.2 2 1
+github.com/myorg/myproject/internal/auth/middleware.go:5.20,10.2 3 1
+github.com/myorg/myproject/internal/auth/middleware.go:12.30,15.2 2 0
+github.com/myorg/myproject/cmd/server/main.go:8.15,12.2 3 1
