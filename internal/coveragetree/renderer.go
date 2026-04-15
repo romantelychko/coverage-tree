@@ -10,6 +10,8 @@ import (
 
 // filePermissions — права доступу до вихідного HTML-файлу.
 const filePermissions = 0o644
+
+// themeVariables містить CSS-змінні для кожної теми.
 var themeVariables = map[string]string{
 	"dark": `--bg: #1e1e1e;
       --bh: #2a2d2e;

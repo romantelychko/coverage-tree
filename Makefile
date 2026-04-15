@@ -10,15 +10,8 @@ build: ## Будує бінарний файл coverage-tree
 
 .PHONY: lint
 lint: ## Виправляє помилки статичного аналізу коду
-	go fix \
-		-any \
-		-rangeint \
-		-minmax \
-		-stringscutprefix \
-		-stringsbuilder \
-		-slicescontains \
-		-waitgroup \
-		./...
+	gofmt -s -w .
+	go vet ./...
 	golangci-lint run ./... --fix
 
 .PHONY: test
