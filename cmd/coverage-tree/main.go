@@ -34,6 +34,59 @@ func (flag *stringSliceFlag) Set(value string) error {
 	return nil
 }
 
+// normalizeBoolArgs перетворює ["--flag", "true"] на ["--flag=true"] для відомих булевих прапорців,
+// щоб запобігти потраплянню "true"/"false" у позиційні аргументи.
+func normalizeBoolArgs(args []string, boolFlags map[string]bool) []string {
+	result := make([]string, 0, len(args))
+
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+
+		name := ""
+
+		switch {
+		case strings.HasPrefix(arg, "--"):
+			name = strings.TrimPrefix(arg, "--")
+		case strings.HasPrefix(arg, "-"):
+			name = strings.TrimPrefix(arg, "-")
+		}
+
+		// Якщо це булевий прапорець без вбудованого значення і наступний токен — "true"/"false"
+		if name != "" && !strings.Contains(name, "=") && boolFlags[name] {
+			if i+1 < len(args) && (args[i+1] == "true" || args[i+1] == "false") {
+				result = append(result, arg+"="+args[i+1])
+				i++
+
+				continue
+			}
+		}
+
+		result = append(result, arg)
+	}
+
+	return result
+}
+
+// printDefaults виводить список прапорців із префіксом "--" замість стандартного "-".
+func printDefaults() {
+	flag.VisitAll(func(f *flag.Flag) {
+		typeName, usage := flag.UnquoteUsage(f)
+
+		s := fmt.Sprintf("  --%s", f.Name)
+		if typeName != "" {
+			s += " " + typeName
+		}
+
+		s += "\n    \t" + usage
+
+		if f.DefValue != "" && f.DefValue != "false" {
+			s += fmt.Sprintf(" (default %q)", f.DefValue)
+		}
+
+		fmt.Fprintln(os.Stderr, s)
+	})
+}
+
 // runParams містить усі параметри для запуску генерації звіту.
 type runParams struct {
 	inputPath       string
@@ -150,8 +203,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "  coverage.out     шлях до файлу coverage profile\n")
 		fmt.Fprintf(os.Stderr, "  output.html      шлях до вихідного HTML-файлу\n\n")
 		fmt.Fprintf(os.Stderr, "Прапорці:\n")
-		flag.PrintDefaults()
+		printDefaults()
 	}
+
+	boolFlags := map[string]bool{
+		"no-autodetect": true,
+		"version":       true,
+	}
+
+	os.Args = append(os.Args[:1], normalizeBoolArgs(os.Args[1:], boolFlags)...)
 
 	flag.Parse()
 

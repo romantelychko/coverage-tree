@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -238,5 +241,126 @@ func TestRunCoverageTreeParseError(test *testing.T) {
 	err := runCoverageTree(params)
 	if err == nil {
 		test.Error("runCoverageTree має повертати помилку при помилці парсингу")
+	}
+}
+
+// TestNormalizeBoolArgsMergeTrue перевіряє злиття "--flag true" в "--flag=true".
+func TestNormalizeBoolArgsMergeTrue(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true, "version": true}
+
+	args := []string{"--no-autodetect", "true", "coverage.out", "report.html"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	expected := []string{"--no-autodetect=true", "coverage.out", "report.html"}
+	if strings.Join(result, "|") != strings.Join(expected, "|") {
+		test.Errorf("Очікувався %v, отримано %v", expected, result)
+	}
+}
+
+// TestNormalizeBoolArgsMergeFalse перевіряє злиття "--flag false" в "--flag=false".
+func TestNormalizeBoolArgsMergeFalse(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true, "version": true}
+
+	args := []string{"--no-autodetect", "false"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	expected := []string{"--no-autodetect=false"}
+	if strings.Join(result, "|") != strings.Join(expected, "|") {
+		test.Errorf("Очікувався %v, отримано %v", expected, result)
+	}
+}
+
+// TestNormalizeBoolArgsSingleDash перевіряє злиття для прапорця з одним мінусом.
+func TestNormalizeBoolArgsSingleDash(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true}
+
+	args := []string{"-no-autodetect", "true"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	expected := []string{"-no-autodetect=true"}
+	if strings.Join(result, "|") != strings.Join(expected, "|") {
+		test.Errorf("Очікувався %v, отримано %v", expected, result)
+	}
+}
+
+// TestNormalizeBoolArgsNoNextArg перевіряє що прапорець без наступного аргументу не змінюється.
+func TestNormalizeBoolArgsNoNextArg(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true}
+
+	args := []string{"--no-autodetect"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	if strings.Join(result, "|") != "--no-autodetect" {
+		test.Errorf("Очікувався [--no-autodetect], отримано %v", result)
+	}
+}
+
+// TestNormalizeBoolArgsNonBoolUnchanged перевіряє що не-булевий прапорець не змінюється.
+func TestNormalizeBoolArgsNonBoolUnchanged(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true}
+
+	args := []string{"--theme", "true"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	expected := []string{"--theme", "true"}
+	if strings.Join(result, "|") != strings.Join(expected, "|") {
+		test.Errorf("Очікувався %v, отримано %v", expected, result)
+	}
+}
+
+// TestNormalizeBoolArgsAlreadyMerged перевіряє що "=value" форма не змінюється.
+func TestNormalizeBoolArgsAlreadyMerged(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true}
+
+	args := []string{"--no-autodetect=true", "coverage.out", "report.html"}
+	result := normalizeBoolArgs(args, boolFlags)
+
+	expected := []string{"--no-autodetect=true", "coverage.out", "report.html"}
+	if strings.Join(result, "|") != strings.Join(expected, "|") {
+		test.Errorf("Очікувався %v, отримано %v", expected, result)
+	}
+}
+
+// TestNormalizeBoolArgsEmpty перевіряє обробку порожнього списку аргументів.
+func TestNormalizeBoolArgsEmpty(test *testing.T) {
+	boolFlags := map[string]bool{"no-autodetect": true}
+
+	result := normalizeBoolArgs([]string{}, boolFlags)
+
+	if len(result) != 0 {
+		test.Errorf("Очікувався порожній результат, отримано %v", result)
+	}
+}
+
+// TestPrintDefaultsDoubleDash перевіряє що printDefaults виводить прапорці з "--".
+func TestPrintDefaultsDoubleDash(test *testing.T) {
+	r, w, err := os.Pipe()
+	if err != nil {
+		test.Fatalf("os.Pipe: %v", err)
+	}
+
+	origStderr := os.Stderr
+	os.Stderr = w
+
+	printDefaults()
+
+	w.Close()
+
+	os.Stderr = origStderr
+
+	var buf bytes.Buffer
+
+	_, _ = io.Copy(&buf, r)
+
+	output := buf.String()
+	if output == "" {
+		test.Fatal("printDefaults нічого не вивела")
+	}
+
+	for _, line := range strings.Split(output, "\n") {
+		// Рядки з прапорцями починаються з "  -"; перевіряємо що не "  -X" (один мінус)
+		if strings.HasPrefix(line, "  -") && !strings.HasPrefix(line, "  --") {
+			test.Errorf("printDefaults вивела прапорець з одним мінусом: %q", line)
+		}
 	}
 }
