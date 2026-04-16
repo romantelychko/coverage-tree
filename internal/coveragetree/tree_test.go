@@ -19,6 +19,8 @@ func findChild(node *coveragetree.TreeJSON, name string) *coveragetree.TreeJSON 
 
 // TestBuildTreeStructure перевіряє побудову дерева з файлових шляхів.
 func TestBuildTreeStructure(test *testing.T) {
+	test.Parallel()
+
 	fileStats := map[string]*coveragetree.FileStats{
 		"internal/users/service.go":   {Statements: 10, Covered: 8},
 		"internal/users/handler.go":   {Statements: 5, Covered: 3},
@@ -66,6 +68,8 @@ func TestBuildTreeStructure(test *testing.T) {
 
 // TestAggregateTree перевіряє рекурсивну агрегацію статистики.
 func TestAggregateTree(test *testing.T) {
+	test.Parallel()
+
 	fileStats := map[string]*coveragetree.FileStats{
 		"internal/users/service.go":   {Statements: 10, Covered: 8},
 		"internal/users/handler.go":   {Statements: 5, Covered: 3},
@@ -115,6 +119,8 @@ func TestAggregateTree(test *testing.T) {
 
 // TestToJSON перевіряє конвертацію дерева в JSON-структуру.
 func TestToJSON(test *testing.T) {
+	test.Parallel()
+
 	fileStats := map[string]*coveragetree.FileStats{
 		"internal/users/service.go": {Statements: 10, Covered: 7},
 		"cmd/main.go":               {Statements: 5, Covered: 5},
@@ -157,6 +163,8 @@ func TestToJSON(test *testing.T) {
 
 // TestToJSONWithZeroStatements перевіряє коректну обробку файлу з 0 statements.
 func TestToJSONWithZeroStatements(test *testing.T) {
+	test.Parallel()
+
 	fileStats := map[string]*coveragetree.FileStats{
 		"empty.go": {Statements: 0, Covered: 0},
 	}
@@ -172,6 +180,8 @@ func TestToJSONWithZeroStatements(test *testing.T) {
 
 // TestCalculateCoverage перевіряє обчислення відсотка покриття.
 func TestCalculateCoverage(test *testing.T) {
+	test.Parallel()
+
 	testCases := []struct {
 		name       string
 		statements int
@@ -187,6 +197,8 @@ func TestCalculateCoverage(test *testing.T) {
 
 	for _, testCase := range testCases {
 		test.Run(testCase.name, func(test *testing.T) {
+			test.Parallel()
+
 			result := coveragetree.CalculateCoverage(testCase.statements, testCase.covered)
 			if result != testCase.expected {
 				test.Errorf(

@@ -2,6 +2,7 @@ package coveragetree
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -10,6 +11,12 @@ import (
 
 // filePermissions — права доступу до вихідного HTML-файлу.
 const filePermissions = 0o644
+
+// ErrUnknownTheme повертається коли передано невідому тему.
+var ErrUnknownTheme = errors.New("невідома тема")
+
+// ErrUnknownLanguage повертається коли передано невідому мову.
+var ErrUnknownLanguage = errors.New("невідома мова")
 
 // themeVariables містить CSS-змінні для кожної теми.
 var themeVariables = map[string]string{
@@ -103,13 +110,13 @@ func RenderHTML(treeJSON *TreeJSON, config Config) error {
 	// Визначення теми
 	themeVars, exists := themeVariables[config.Theme]
 	if !exists {
-		return fmt.Errorf("Невідома тема: %s (доступні: dark, light)", config.Theme)
+		return fmt.Errorf("%w: %s (доступні: dark, light)", ErrUnknownTheme, config.Theme)
 	}
 
 	// Визначення локалізації
 	locale, exists := localizations[config.Language]
 	if !exists {
-		return fmt.Errorf("Невідома мова: %s (доступні: uk, en)", config.Language)
+		return fmt.Errorf("%w: %s (доступні: uk, en)", ErrUnknownLanguage, config.Language)
 	}
 
 	// Заголовок: кастомний або з локалізації

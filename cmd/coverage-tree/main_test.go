@@ -10,6 +10,11 @@ import (
 	"testing"
 )
 
+const (
+	testTheme = "dark"
+	testLang  = "uk"
+)
+
 // projectTestdata повертає шлях до директорії testdata у корені проєкту.
 func projectTestdata(fileName string) string {
 	pcs := [1]uintptr{}
@@ -22,6 +27,8 @@ func projectTestdata(fileName string) string {
 
 // TestStringSliceFlagString перевіряє рядкове представлення прапорця.
 func TestStringSliceFlagString(test *testing.T) {
+	test.Parallel()
+
 	var flag stringSliceFlag
 
 	if flag.String() != "" {
@@ -39,13 +46,17 @@ func TestStringSliceFlagString(test *testing.T) {
 
 // TestStringSliceFlagSet перевіряє додавання значень до прапорця.
 func TestStringSliceFlagSet(test *testing.T) {
+	test.Parallel()
+
 	var flag stringSliceFlag
 
-	if err := flag.Set("first"); err != nil {
+	err := flag.Set("first")
+	if err != nil {
 		test.Fatalf("Set повернув помилку: %v", err)
 	}
 
-	if err := flag.Set("second"); err != nil {
+	err = flag.Set("second")
+	if err != nil {
 		test.Fatalf("Set повернув помилку: %v", err)
 	}
 
@@ -60,6 +71,8 @@ func TestStringSliceFlagSet(test *testing.T) {
 
 // TestRunCoverageTreeSuccess перевіряє успішну генерацію звіту.
 func TestRunCoverageTreeSuccess(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:       projectTestdata("simple.out"),
 		outputPath:      filepath.Join(test.TempDir(), "out.html"),
@@ -67,53 +80,62 @@ func TestRunCoverageTreeSuccess(test *testing.T) {
 		noAutodetect:    true,
 		excludeSuffixes: []string{"_test.go"},
 		excludeDirs:     []string{"mocks"},
-		theme:           "dark",
-		language:        "uk",
+		theme:           testTheme,
+		language:        testLang,
 	}
 
-	if err := runCoverageTree(params); err != nil {
+	err := runCoverageTree(params)
+	if err != nil {
 		test.Fatalf("runCoverageTree повернув помилку: %v", err)
 	}
 }
 
 // TestRunCoverageTreeDefaultExcludes перевіряє заповнення exclude за замовчуванням.
 func TestRunCoverageTreeDefaultExcludes(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:    projectTestdata("simple.out"),
 		outputPath:   filepath.Join(test.TempDir(), "out.html"),
 		modulePrefix: "github.com/myorg/myproject/",
 		noAutodetect: true,
-		theme:        "dark",
-		language:     "uk",
+		theme:        testTheme,
+		language:     testLang,
 	}
 
-	if err := runCoverageTree(params); err != nil {
+	err := runCoverageTree(params)
+	if err != nil {
 		test.Fatalf("runCoverageTree повернув помилку: %v", err)
 	}
 }
 
 // TestRunCoverageTreeAutodetectPrefix перевіряє автодетект префікса модуля.
 func TestRunCoverageTreeAutodetectPrefix(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:  projectTestdata("simple.out"),
 		outputPath: filepath.Join(test.TempDir(), "out.html"),
-		theme:      "dark",
-		language:   "uk",
+		theme:      testTheme,
+		language:   testLang,
 	}
 
-	if err := runCoverageTree(params); err != nil {
+	err := runCoverageTree(params)
+	if err != nil {
 		test.Fatalf("runCoverageTree повернув помилку: %v", err)
 	}
 }
 
 // TestRunCoverageTreeFileNotFound перевіряє помилку при відсутньому файлі.
 func TestRunCoverageTreeFileNotFound(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:    "/nonexistent/coverage.out",
 		outputPath:   filepath.Join(test.TempDir(), "out.html"),
 		noAutodetect: true,
-		theme:        "dark",
-		language:     "uk",
+		theme:        testTheme,
+		language:     testLang,
 	}
 
 	err := runCoverageTree(params)
@@ -124,12 +146,14 @@ func TestRunCoverageTreeFileNotFound(test *testing.T) {
 
 // TestRunCoverageTreeEmptyStats перевіряє помилку при відсутності даних покриття.
 func TestRunCoverageTreeEmptyStats(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:    projectTestdata("empty.out"),
 		outputPath:   filepath.Join(test.TempDir(), "out.html"),
 		noAutodetect: true,
-		theme:        "dark",
-		language:     "uk",
+		theme:        testTheme,
+		language:     testLang,
 	}
 
 	err := runCoverageTree(params)
@@ -140,13 +164,15 @@ func TestRunCoverageTreeEmptyStats(test *testing.T) {
 
 // TestRunCoverageTreeRenderError перевіряє помилку при невалідній темі.
 func TestRunCoverageTreeRenderError(test *testing.T) {
+	test.Parallel()
+
 	params := runParams{
 		inputPath:    projectTestdata("simple.out"),
 		outputPath:   filepath.Join(test.TempDir(), "out.html"),
 		modulePrefix: "github.com/myorg/myproject/",
 		noAutodetect: true,
 		theme:        "invalid-theme",
-		language:     "uk",
+		language:     testLang,
 	}
 
 	err := runCoverageTree(params)
@@ -157,6 +183,8 @@ func TestRunCoverageTreeRenderError(test *testing.T) {
 
 // TestResolveModulePrefixExplicit перевіряє повернення явно вказаного префікса.
 func TestResolveModulePrefixExplicit(test *testing.T) {
+	test.Parallel()
+
 	prefix, err := resolveModulePrefix("anything", "my-prefix/", false)
 	if err != nil {
 		test.Fatalf("resolveModulePrefix повернув помилку: %v", err)
@@ -169,6 +197,8 @@ func TestResolveModulePrefixExplicit(test *testing.T) {
 
 // TestResolveModulePrefixNoAutodetect перевіряє вимкнення автодетекту.
 func TestResolveModulePrefixNoAutodetect(test *testing.T) {
+	test.Parallel()
+
 	prefix, err := resolveModulePrefix("anything", "", true)
 	if err != nil {
 		test.Fatalf("resolveModulePrefix повернув помилку: %v", err)
@@ -181,6 +211,8 @@ func TestResolveModulePrefixNoAutodetect(test *testing.T) {
 
 // TestResolveModulePrefixAutodetect перевіряє автодетект префікса.
 func TestResolveModulePrefixAutodetect(test *testing.T) {
+	test.Parallel()
+
 	prefix, err := resolveModulePrefix(projectTestdata("simple.out"), "", false)
 	if err != nil {
 		test.Fatalf("resolveModulePrefix повернув помилку: %v", err)
@@ -194,31 +226,36 @@ func TestResolveModulePrefixAutodetect(test *testing.T) {
 
 // makeUnreadable створює тимчасовий файл із забороненим доступом на читання.
 // Повертає шлях до файлу і функцію відновлення прав доступу.
-func makeUnreadable(test *testing.T) string {
-	test.Helper()
+func makeUnreadable(t *testing.T) string {
+	t.Helper()
 
-	inputPath := filepath.Join(test.TempDir(), "coverage.out")
-	if err := os.WriteFile(inputPath, []byte("mode: set\n"), 0o644); err != nil {
-		test.Fatal(err)
+	inputPath := filepath.Join(t.TempDir(), "coverage.out")
+
+	err := os.WriteFile(inputPath, []byte("mode: set\n"), 0o644) //nolint:gosec // intentional test file
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if err := os.Chmod(inputPath, 0o000); err != nil {
-		test.Skip("неможливо встановити права доступу: " + err.Error())
+	err = os.Chmod(inputPath, 0o000)
+	if err != nil {
+		t.Skip("неможливо встановити права доступу: " + err.Error())
 	}
 
-	test.Cleanup(func() { _ = os.Chmod(inputPath, 0o644) })
+	t.Cleanup(func() { _ = os.Chmod(inputPath, 0o644) }) //nolint:gosec // G302: restoring test file to readable state
 
 	return inputPath
 }
 
 // TestRunCoverageTreeAutodetectError перевіряє помилку автодетекту при нечитабельному файлі.
 func TestRunCoverageTreeAutodetectError(test *testing.T) {
+	test.Parallel()
+
 	inputPath := makeUnreadable(test)
 	params := runParams{
 		inputPath:  inputPath,
 		outputPath: filepath.Join(test.TempDir(), "out.html"),
-		theme:      "dark",
-		language:   "uk",
+		theme:      testTheme,
+		language:   testLang,
 	}
 
 	err := runCoverageTree(params)
@@ -229,13 +266,15 @@ func TestRunCoverageTreeAutodetectError(test *testing.T) {
 
 // TestRunCoverageTreeParseError перевіряє помилку парсингу при нечитабельному файлі.
 func TestRunCoverageTreeParseError(test *testing.T) {
+	test.Parallel()
+
 	inputPath := makeUnreadable(test)
 	params := runParams{
 		inputPath:    inputPath,
 		outputPath:   filepath.Join(test.TempDir(), "out.html"),
 		noAutodetect: true,
-		theme:        "dark",
-		language:     "uk",
+		theme:        testTheme,
+		language:     testLang,
 	}
 
 	err := runCoverageTree(params)
@@ -246,6 +285,8 @@ func TestRunCoverageTreeParseError(test *testing.T) {
 
 // TestNormalizeBoolArgsMergeTrue перевіряє злиття "--flag true" в "--flag=true".
 func TestNormalizeBoolArgsMergeTrue(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true, "version": true}
 
 	args := []string{"--no-autodetect", "true", "coverage.out", "report.html"}
@@ -259,6 +300,8 @@ func TestNormalizeBoolArgsMergeTrue(test *testing.T) {
 
 // TestNormalizeBoolArgsMergeFalse перевіряє злиття "--flag false" в "--flag=false".
 func TestNormalizeBoolArgsMergeFalse(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true, "version": true}
 
 	args := []string{"--no-autodetect", "false"}
@@ -272,6 +315,8 @@ func TestNormalizeBoolArgsMergeFalse(test *testing.T) {
 
 // TestNormalizeBoolArgsSingleDash перевіряє злиття для прапорця з одним мінусом.
 func TestNormalizeBoolArgsSingleDash(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true}
 
 	args := []string{"-no-autodetect", "true"}
@@ -285,6 +330,8 @@ func TestNormalizeBoolArgsSingleDash(test *testing.T) {
 
 // TestNormalizeBoolArgsNoNextArg перевіряє що прапорець без наступного аргументу не змінюється.
 func TestNormalizeBoolArgsNoNextArg(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true}
 
 	args := []string{"--no-autodetect"}
@@ -297,6 +344,8 @@ func TestNormalizeBoolArgsNoNextArg(test *testing.T) {
 
 // TestNormalizeBoolArgsNonBoolUnchanged перевіряє що не-булевий прапорець не змінюється.
 func TestNormalizeBoolArgsNonBoolUnchanged(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true}
 
 	args := []string{"--theme", "true"}
@@ -310,6 +359,8 @@ func TestNormalizeBoolArgsNonBoolUnchanged(test *testing.T) {
 
 // TestNormalizeBoolArgsAlreadyMerged перевіряє що "=value" форма не змінюється.
 func TestNormalizeBoolArgsAlreadyMerged(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true}
 
 	args := []string{"--no-autodetect=true", "coverage.out", "report.html"}
@@ -323,6 +374,8 @@ func TestNormalizeBoolArgsAlreadyMerged(test *testing.T) {
 
 // TestNormalizeBoolArgsEmpty перевіряє обробку порожнього списку аргументів.
 func TestNormalizeBoolArgsEmpty(test *testing.T) {
+	test.Parallel()
+
 	boolFlags := map[string]bool{"no-autodetect": true}
 
 	result := normalizeBoolArgs([]string{}, boolFlags)
@@ -333,31 +386,35 @@ func TestNormalizeBoolArgsEmpty(test *testing.T) {
 }
 
 // TestPrintDefaultsDoubleDash перевіряє що printDefaults виводить прапорці з "--".
+//
+//nolint:paralleltest // мутує глобальний os.Stderr
 func TestPrintDefaultsDoubleDash(test *testing.T) {
-	r, w, err := os.Pipe()
+	pipeReader, pipeWriter, err := os.Pipe()
 	if err != nil {
 		test.Fatalf("os.Pipe: %v", err)
 	}
 
 	origStderr := os.Stderr
-	os.Stderr = w
+	os.Stderr = pipeWriter
 
 	printDefaults()
 
-	w.Close()
+	if err := pipeWriter.Close(); err != nil {
+		test.Fatalf("w.Close: %v", err)
+	}
 
 	os.Stderr = origStderr
 
 	var buf bytes.Buffer
 
-	_, _ = io.Copy(&buf, r)
+	_, _ = io.Copy(&buf, pipeReader)
 
 	output := buf.String()
 	if output == "" {
 		test.Fatal("printDefaults нічого не вивела")
 	}
 
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		// Рядки з прапорцями починаються з "  -"; перевіряємо що не "  -X" (один мінус)
 		if strings.HasPrefix(line, "  -") && !strings.HasPrefix(line, "  --") {
 			test.Errorf("printDefaults вивела прапорець з одним мінусом: %q", line)

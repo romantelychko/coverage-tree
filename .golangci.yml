@@ -1,17 +1,36 @@
 version: "2"
 
 linters:
-  default: fast
+  default: all
   disable:
     - wsl
-  enable:
-    - wsl_v5
+    - exhaustruct
+    - forbidigo
+    - gochecknoglobals
+    - noinlineerr
   settings:
+    staticcheck:
+      checks:
+        - "all"
+        - "-ST1000"
+        - "-ST1003"
+        - "-ST1005"
+    varnamelen:
+      min-name-length: 3
+    revive:
+      rules:
+        - name: exported
+          severity: error
+          arguments:
+            - "checkPrivateReceivers"
+            - "sayRepetitiveInsteadOfStutters"
+        - name: package-comments
+          severity: warning
     cyclop:
-      max-complexity: 12
+      max-complexity: 20
     funlen:
-      lines: 80
-      statements: 50
+      lines: 120
+      statements: 120
     depguard:
       rules:
         main:
@@ -23,6 +42,20 @@ linters:
       allow-first-in-block: true
       allow-whole-block: false
       branch-max-lines: 2
+
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+    - golines
+    - swaggo
+  settings:
+    gofmt:
+      simplify: true
+    golines:
+      max-len: 200
 
 issues:
   max-issues-per-linter: 0

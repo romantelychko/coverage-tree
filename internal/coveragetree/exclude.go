@@ -1,8 +1,9 @@
 package coveragetree
 
-import "slices"
-
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // ShouldExclude перевіряє чи файл або директорія мають бути виключені зі звіту.
 // Файл виключається якщо його ім'я закінчується на один із суфіксів,

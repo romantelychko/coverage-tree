@@ -43,11 +43,12 @@ func ParseCoverage(
 	excludeSuffixes []string,
 	excludeDirs []string,
 ) (map[string]*FileStats, error) {
-	file, err := os.Open(inputPath)
+	file, err := os.Open(inputPath) //nolint:gosec // G304: CLI tool reads user-provided files
 	if err != nil {
 		return nil, fmt.Errorf("Не вдалося відкрити файл %s: %w", inputPath, err)
 	}
-	defer file.Close()
+
+	defer func() { _ = file.Close() }()
 
 	blocks := make(map[string]*coverageBlock)
 	mode := "set"
@@ -75,8 +76,16 @@ func ParseCoverage(
 		filePath := match[1]
 		blockStart := match[2]
 		blockEnd := match[3]
-		statements, _ := strconv.Atoi(match[4])
-		count, _ := strconv.Atoi(match[5])
+
+		statements, err := strconv.Atoi(match[4])
+		if err != nil {
+			continue
+		}
+
+		count, err := strconv.Atoi(match[5])
+		if err != nil {
+			continue
+		}
 
 		// Обрізка префікса модуля
 		if modulePrefix != "" && strings.HasPrefix(filePath, modulePrefix) {
@@ -142,11 +151,12 @@ func aggregateBlocks(blocks map[string]*coverageBlock) map[string]*FileStats {
 // DetectModulePrefix автоматично визначає префікс модуля з файлу coverage.out.
 // Шукає відомі кореневі директорії (cmd, internal, pkg тощо) та будує prefix зі шляху до них.
 func DetectModulePrefix(inputPath string) (string, error) {
-	file, err := os.Open(inputPath)
+	file, err := os.Open(inputPath) //nolint:gosec // G304: CLI tool reads user-provided files
 	if err != nil {
 		return "", fmt.Errorf("Не вдалося відкрити файл %s: %w", inputPath, err)
 	}
-	defer file.Close()
+
+	defer func() { _ = file.Close() }()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

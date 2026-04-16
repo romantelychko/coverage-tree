@@ -8,6 +8,8 @@ import (
 
 // TestDefaultConfig перевіряє конфігурацію за замовчуванням.
 func TestDefaultConfig(test *testing.T) {
+	test.Parallel()
+
 	config := coveragetree.DefaultConfig()
 
 	if config.Theme != "dark" {

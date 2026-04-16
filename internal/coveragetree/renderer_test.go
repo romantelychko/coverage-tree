@@ -32,6 +32,8 @@ func renderAndReadHTML(
 
 // TestRenderHTMLDarkTheme перевіряє генерацію HTML зі стандартною темною темою.
 func TestRenderHTMLDarkTheme(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 100,
@@ -68,6 +70,8 @@ func TestRenderHTMLDarkTheme(t *testing.T) {
 
 // TestRenderHTMLLightThemeEnglish перевіряє генерацію HTML зі світлою темою англійською.
 func TestRenderHTMLLightThemeEnglish(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 50,
@@ -104,6 +108,8 @@ func TestRenderHTMLLightThemeEnglish(t *testing.T) {
 
 // TestRenderHTMLCustomTitle перевіряє генерацію HTML з кастомним заголовком.
 func TestRenderHTMLCustomTitle(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 10,
@@ -129,6 +135,8 @@ func TestRenderHTMLCustomTitle(t *testing.T) {
 
 // TestRenderHTMLInvalidTheme перевіряє помилку при невідомій темі.
 func TestRenderHTMLInvalidTheme(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 10,
@@ -152,6 +160,8 @@ func TestRenderHTMLInvalidTheme(t *testing.T) {
 
 // TestRenderHTMLInvalidLanguage перевіряє помилку при невідомій мові.
 func TestRenderHTMLInvalidLanguage(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 10,
@@ -175,6 +185,8 @@ func TestRenderHTMLInvalidLanguage(t *testing.T) {
 
 // TestRenderHTMLContainsTreeData перевіряє що JSON-дані дерева присутні в HTML.
 func TestRenderHTMLContainsTreeData(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 100,
@@ -216,6 +228,8 @@ func TestRenderHTMLContainsTreeData(t *testing.T) {
 
 // TestRenderHTMLWriteError перевіряє помилку при неможливості записати файл.
 func TestRenderHTMLWriteError(t *testing.T) {
+	t.Parallel()
+
 	treeJSON := &coveragetree.TreeJSON{
 		Name:       "root",
 		Statements: 10,

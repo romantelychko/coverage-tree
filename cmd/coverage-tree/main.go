@@ -5,6 +5,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -18,6 +19,11 @@ var version = "dev"
 
 // requiredArgCount — кількість обов'язкових позиційних аргументів.
 const requiredArgCount = 2
+
+var (
+	errFileNotFound   = errors.New("файл не знайдено")
+	errNoCoverageData = errors.New("дані покриття не знайдено")
+)
 
 // stringSliceFlag реалізує flag.Value для прапорців, що можуть бути вказані кілька разів.
 type stringSliceFlag []string
@@ -39,8 +45,8 @@ func (flag *stringSliceFlag) Set(value string) error {
 func normalizeBoolArgs(args []string, boolFlags map[string]bool) []string {
 	result := make([]string, 0, len(args))
 
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
+	for idx := 0; idx < len(args); idx++ {
+		arg := args[idx]
 
 		name := ""
 
@@ -53,9 +59,9 @@ func normalizeBoolArgs(args []string, boolFlags map[string]bool) []string {
 
 		// Якщо це булевий прапорець без вбудованого значення і наступний токен — "true"/"false"
 		if name != "" && !strings.Contains(name, "=") && boolFlags[name] {
-			if i+1 < len(args) && (args[i+1] == "true" || args[i+1] == "false") {
-				result = append(result, arg+"="+args[i+1])
-				i++
+			if idx+1 < len(args) && (args[idx+1] == "true" || args[idx+1] == "false") {
+				result = append(result, arg+"="+args[idx+1])
+				idx++
 
 				continue
 			}
@@ -69,21 +75,21 @@ func normalizeBoolArgs(args []string, boolFlags map[string]bool) []string {
 
 // printDefaults виводить список прапорців із префіксом "--" замість стандартного "-".
 func printDefaults() {
-	flag.VisitAll(func(f *flag.Flag) {
-		typeName, usage := flag.UnquoteUsage(f)
+	flag.VisitAll(func(flagItem *flag.Flag) {
+		typeName, usage := flag.UnquoteUsage(flagItem)
 
-		s := fmt.Sprintf("  --%s", f.Name)
+		out := "  --" + flagItem.Name
 		if typeName != "" {
-			s += " " + typeName
+			out += " " + typeName
 		}
 
-		s += "\n    \t" + usage
+		out += "\n    \t" + usage
 
-		if f.DefValue != "" && f.DefValue != "false" {
-			s += fmt.Sprintf(" (default %q)", f.DefValue)
+		if flagItem.DefValue != "" && flagItem.DefValue != "false" {
+			out += fmt.Sprintf(" (default %q)", flagItem.DefValue)
 		}
 
-		fmt.Fprintln(os.Stderr, s)
+		fmt.Fprintln(os.Stderr, out)
 	})
 }
 
@@ -101,33 +107,33 @@ type runParams struct {
 }
 
 // runCoverageTree виконує повний цикл: парсинг → побудова дерева → генерація HTML.
-func runCoverageTree(p runParams) error {
-	if _, err := os.Stat(p.inputPath); os.IsNotExist(err) {
-		return fmt.Errorf("файл не знайдено: %s", p.inputPath)
+func runCoverageTree(params runParams) error {
+	if _, err := os.Stat(params.inputPath); os.IsNotExist(err) {
+		return fmt.Errorf("%w: %s", errFileNotFound, params.inputPath)
 	}
 
-	if len(p.excludeSuffixes) == 0 {
-		p.excludeSuffixes = coveragetree.DefaultExcludeSuffixes()
+	if len(params.excludeSuffixes) == 0 {
+		params.excludeSuffixes = coveragetree.DefaultExcludeSuffixes()
 	}
 
-	if len(p.excludeDirs) == 0 {
-		p.excludeDirs = coveragetree.DefaultExcludeDirs()
+	if len(params.excludeDirs) == 0 {
+		params.excludeDirs = coveragetree.DefaultExcludeDirs()
 	}
 
-	resolvedPrefix, err := resolveModulePrefix(p.inputPath, p.modulePrefix, p.noAutodetect)
+	resolvedPrefix, err := resolveModulePrefix(params.inputPath, params.modulePrefix, params.noAutodetect)
 	if err != nil {
 		return fmt.Errorf("помилка автодетекту префікса: %w", err)
 	}
 
 	fileStats, err := coveragetree.ParseCoverage(
-		p.inputPath, resolvedPrefix, p.excludeSuffixes, p.excludeDirs,
+		params.inputPath, resolvedPrefix, params.excludeSuffixes, params.excludeDirs,
 	)
 	if err != nil {
 		return fmt.Errorf("помилка парсингу: %w", err)
 	}
 
 	if len(fileStats) == 0 {
-		return fmt.Errorf("дані покриття не знайдено")
+		return errNoCoverageData
 	}
 
 	fmt.Printf("Файлів: %d\n", len(fileStats))
@@ -137,14 +143,14 @@ func runCoverageTree(p runParams) error {
 	treeJSON := coveragetree.ToJSON(tree, "root")
 
 	config := coveragetree.Config{
-		InputPath:       p.inputPath,
-		OutputPath:      p.outputPath,
+		InputPath:       params.inputPath,
+		OutputPath:      params.outputPath,
 		ModulePrefix:    resolvedPrefix,
-		ExcludeSuffixes: p.excludeSuffixes,
-		ExcludeDirs:     p.excludeDirs,
-		Theme:           p.theme,
-		Language:        p.language,
-		Title:           p.title,
+		ExcludeSuffixes: params.excludeSuffixes,
+		ExcludeDirs:     params.excludeDirs,
+		Theme:           params.theme,
+		Language:        params.language,
+		Title:           params.title,
 	}
 
 	if err := coveragetree.RenderHTML(treeJSON, config); err != nil {
@@ -152,7 +158,7 @@ func runCoverageTree(p runParams) error {
 	}
 
 	fmt.Printf("Покриття: %.1f%% (%d / %d)\n", treeJSON.Coverage, treeJSON.Covered, treeJSON.Statements)
-	fmt.Printf("Звіт: %s\n", p.outputPath)
+	fmt.Printf("Звіт: %s\n", params.outputPath)
 
 	return nil
 }
@@ -165,7 +171,7 @@ func resolveModulePrefix(inputPath, modulePrefix string, noAutodetect bool) (str
 
 	detected, err := coveragetree.DetectModulePrefix(inputPath)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("автодетект префікса: %w", err)
 	}
 
 	if detected != "" {

@@ -8,6 +8,8 @@ import (
 
 // TestShouldExcludeBySuffix перевіряє виключення файлів за суфіксом.
 func TestShouldExcludeBySuffix(test *testing.T) {
+	test.Parallel()
+
 	suffixes := []string{"_mock.go", "_test.go"}
 	directories := []string{"mocks"}
 
@@ -55,6 +57,8 @@ func TestShouldExcludeBySuffix(test *testing.T) {
 
 	for _, testCase := range testCases {
 		test.Run(testCase.name, func(test *testing.T) {
+			test.Parallel()
+
 			result := coveragetree.ShouldExclude(testCase.filePath, suffixes, directories)
 			if result != testCase.expected {
 				test.Errorf("ShouldExclude(%q) = %v, очікувалось %v", testCase.filePath, result, testCase.expected)
@@ -65,6 +69,8 @@ func TestShouldExcludeBySuffix(test *testing.T) {
 
 // TestShouldExcludeWithEmptyFilters перевіряє що без фільтрів нічого не виключається.
 func TestShouldExcludeWithEmptyFilters(test *testing.T) {
+	test.Parallel()
+
 	result := coveragetree.ShouldExclude("internal/users/service_mock.go", nil, nil)
 	if result {
 		test.Error("ShouldExclude з порожніми фільтрами має повертати false")

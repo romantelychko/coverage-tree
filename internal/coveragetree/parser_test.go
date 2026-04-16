@@ -19,10 +19,15 @@ func testdataPath(fileName string) string {
 	return filepath.Join(projectRoot, "testdata", fileName)
 }
 
+// testModulePrefix — тестовий префікс модуля, що повторюється у кількох тестах.
+const testModulePrefix = "github.com/myorg/myproject/"
+
 // TestParseCoverageSimple перевіряє базовий парсинг coverage.out.
 func TestParseCoverageSimple(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("simple.out")
-	prefix := "github.com/myorg/myproject/"
+	prefix := testModulePrefix
 	suffixes := coveragetree.DefaultExcludeSuffixes()
 	directories := coveragetree.DefaultExcludeDirs()
 
@@ -55,8 +60,10 @@ func TestParseCoverageSimple(test *testing.T) {
 
 // TestParseCoverageDeduplicate перевіряє дедуплікацію блоків при -coverpkg=./...
 func TestParseCoverageDeduplicate(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("coverpkg.out")
-	prefix := "github.com/myorg/myproject/"
+	prefix := testModulePrefix
 	suffixes := coveragetree.DefaultExcludeSuffixes()
 	directories := coveragetree.DefaultExcludeDirs()
 
@@ -89,8 +96,10 @@ func TestParseCoverageDeduplicate(test *testing.T) {
 
 // TestParseCoverageAtomicMode перевіряє сумування count для mode:atomic.
 func TestParseCoverageAtomicMode(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("atomic.out")
-	prefix := "github.com/myorg/myproject/"
+	prefix := testModulePrefix
 
 	fileStats, err := coveragetree.ParseCoverage(inputPath, prefix, nil, nil)
 	if err != nil {
@@ -115,6 +124,8 @@ func TestParseCoverageAtomicMode(test *testing.T) {
 
 // TestParseCoverageEmpty перевіряє парсинг порожнього coverage.out.
 func TestParseCoverageEmpty(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("empty.out")
 
 	fileStats, err := coveragetree.ParseCoverage(inputPath, "", nil, nil)
@@ -129,6 +140,8 @@ func TestParseCoverageEmpty(test *testing.T) {
 
 // TestParseCoverageFileNotFound перевіряє помилку при відсутньому файлі.
 func TestParseCoverageFileNotFound(test *testing.T) {
+	test.Parallel()
+
 	_, err := coveragetree.ParseCoverage("/nonexistent/coverage.out", "", nil, nil)
 	if err == nil {
 		test.Error("ParseCoverage має повертати помилку для неіснуючого файлу")
@@ -137,6 +150,8 @@ func TestParseCoverageFileNotFound(test *testing.T) {
 
 // TestDetectModulePrefix перевіряє автодетект префікса модуля.
 func TestDetectModulePrefix(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("simple.out")
 
 	prefix, err := coveragetree.DetectModulePrefix(inputPath)
@@ -144,7 +159,7 @@ func TestDetectModulePrefix(test *testing.T) {
 		test.Fatalf("DetectModulePrefix повернув помилку: %v", err)
 	}
 
-	expectedPrefix := "github.com/myorg/myproject/"
+	expectedPrefix := testModulePrefix
 	if prefix != expectedPrefix {
 		test.Errorf("Очікувався префікс %q, отримано %q", expectedPrefix, prefix)
 	}
@@ -152,6 +167,8 @@ func TestDetectModulePrefix(test *testing.T) {
 
 // TestDetectModulePrefixEmpty перевіряє автодетект для порожнього файлу.
 func TestDetectModulePrefixEmpty(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("empty.out")
 
 	prefix, err := coveragetree.DetectModulePrefix(inputPath)
@@ -166,8 +183,10 @@ func TestDetectModulePrefixEmpty(test *testing.T) {
 
 // TestParseCoverageMixedLines перевіряє пропуск порожніх та невалідних рядків.
 func TestParseCoverageMixedLines(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("mixed-lines.out")
-	prefix := "github.com/myorg/myproject/"
+	prefix := testModulePrefix
 
 	fileStats, err := coveragetree.ParseCoverage(inputPath, prefix, nil, nil)
 	if err != nil {
@@ -181,6 +200,8 @@ func TestParseCoverageMixedLines(test *testing.T) {
 
 // TestDetectModulePrefixFileNotFound перевіряє помилку при відсутньому файлі.
 func TestDetectModulePrefixFileNotFound(test *testing.T) {
+	test.Parallel()
+
 	_, err := coveragetree.DetectModulePrefix("/nonexistent/coverage.out")
 	if err == nil {
 		test.Error("DetectModulePrefix має повертати помилку для неіснуючого файлу")
@@ -189,6 +210,8 @@ func TestDetectModulePrefixFileNotFound(test *testing.T) {
 
 // TestDetectModulePrefixNoColon перевіряє пропуск рядків без двокрапки.
 func TestDetectModulePrefixNoColon(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("no-colon-lines.out")
 
 	prefix, err := coveragetree.DetectModulePrefix(inputPath)
@@ -196,7 +219,7 @@ func TestDetectModulePrefixNoColon(test *testing.T) {
 		test.Fatalf("DetectModulePrefix повернув помилку: %v", err)
 	}
 
-	expectedPrefix := "github.com/myorg/myproject/"
+	expectedPrefix := testModulePrefix
 	if prefix != expectedPrefix {
 		test.Errorf("Очікувався префікс %q, отримано %q", expectedPrefix, prefix)
 	}
@@ -205,6 +228,8 @@ func TestDetectModulePrefixNoColon(test *testing.T) {
 // TestDetectModulePrefixNoModulePrefix перевіряє повернення порожнього префікса
 // коли відома директорія стоїть на початку шляху (без модульного префікса).
 func TestDetectModulePrefixNoModulePrefix(test *testing.T) {
+	test.Parallel()
+
 	inputPath := testdataPath("no-prefix.out")
 
 	prefix, err := coveragetree.DetectModulePrefix(inputPath)

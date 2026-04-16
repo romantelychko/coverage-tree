@@ -10,7 +10,6 @@ build: ## Будує бінарний файл coverage-tree
 
 .PHONY: lint
 lint: ## Виправляє помилки статичного аналізу коду
-	gofmt -s -w .
 	go vet ./...
 	golangci-lint run ./... --fix
 
@@ -20,7 +19,7 @@ test: ## Виконує тести
 
 .PHONY: install
 install: ## Встановлює бінарний файл coverage-tree
-	go install -ldflags "-X main.version=$(VERSION)" ./cmd/coverage-tree
+	go install -ldflags "-s -w -X main.version=$(VERSION)" -trimpath ./cmd/coverage-tree
 
 .PHONY: update
 update: ## Оновлення залежностей Go
